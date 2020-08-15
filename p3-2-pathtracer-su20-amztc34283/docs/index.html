@@ -1,0 +1,176 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+<style>
+    body {
+        padding: 100px;
+        width: 1000px;
+        margin: auto;
+        text-align: left;
+        font-weight: 300;
+        font-family: 'Open Sans', sans-serif;
+        color: #121212;
+    }
+    h1, h2, h3, h4 {
+        font-family: 'Source Sans Pro', sans-serif;
+    }
+</style>
+<title>Billy Chau  |  CS 184</title>
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<link rel="stylesheet" type="text/css" href="style.css" media="screen" />
+</head>
+<body>
+<br />
+<h1 align="middle">Assignment 3: PathTracer</h1>
+    <h2 align="middle">Billy Chau</h2>
+
+    <h2 align="middle">Part 2: Microfacet Material</h2>
+
+    <p>The idea of microfacet modeling is to represent different materials using only micro-surface reflections. The intuition behind this technique is
+    the belief that a macro-surface can be represented by sampling the underlying micro-surface reflections distribution around the area. There are three
+    important terms in the BRDF of microfacet: Fresnel term, shadow-masking term, and normal distribution function. Fresnel term takes care of the reflectance
+    dependence of the material. For example, there is nearly zero reflection when looking at the surface of the wood at a very high incident angle, and the
+    reflectance will get more apparent when the angle becomes lower. Shadow-masking term handles the probability that the outgoing light not being
+    seen by the viewer because the ray is blocked by other micro-surfaces and the probability that the incoming light not being lit by the light source.
+    Normal distribution function represents the distribution of the half angle in which we can then use it to find the reflection vector, specifically,
+    Beckmann distribution is used in this work. After calculating the BRDF of the microfacet material, we still have to scale the BRDF properly because of the
+    new distribution function. For brevity, the pdf functions can be found in the original document.</p>
+
+    <table style="width=100%">
+        <tr>
+            <td align="middle">
+                <img src="images/dragon_0.005_128_1_5.png" width="480px" />
+                <figcaption align="middle">Dragon with alpha = 0.005</figcaption>
+            <td align="middle">
+                <img src="images/dragon_0.05_128_1_5.png" width="480px" />
+                <figcaption align="middle">Dragon with alpha = 0.05</figcaption>
+        </tr>
+        <tr>
+            <td align="middle">
+                <img src="images/dragon_0.25_128_1_5.png" width="480px" />
+                <figcaption align="middle">Dragon with alpha = 0.25</figcaption>
+            <td align="middle">
+                <img src="images/dragon_0.5_128_1_5.png" width="480px" />
+                <figcaption align="middle">Dragon with alpha = 0.5</figcaption>
+        </tr>
+    </table>
+
+    <p>As expected, lower alpha produces smoother and more specular surface while higher alpha produces rougher and more diffuse surface.</p>
+
+    <table style="width=100%">
+        <tr>
+            <td align="middle">
+                <img src="images/bunny_64_1_5_cosine.png" width="480px" />
+                <figcaption align="middle">Bunny with cosine hemisphere sampling</figcaption>
+            <td align="middle">
+                <img src="images/bunny_64_1_5_importance.png" width="480px" />
+                <figcaption align="middle">Bunny with importance sampling</figcaption>
+        </tr>
+    </table>
+
+    <p>As expected, cosine hemisphere sampling does not suit well for microfacet surfaces because its normal distribution function does not resemble the
+    Beckmann distribution well, thus producing a lots of noise. Therefore, our pdf functions are designed in a way such that it resembles the Beckmann
+    distribution when combined.</p>
+
+    <center>
+        <img src="images/bunny_64_1_5_silver.png" width="680px" />
+        <figcaption align="middle">Bunny with Silver Material</figcaption>
+    </center>
+
+<!--double n_red = 0.059193;-->
+<!--double k_red = 4.1283;-->
+<!--double n_green = 0.059881;-->
+<!--double k_green = 3.5892;-->
+<!--double n_blue = 0.047366;-->
+<!--double k_blue = 2.8132;-->
+
+    <p>As expected, using eta=(0.059193, 0.059881, 0.047366) and k=(4.1283, 3.5892, 2.8132), we can represent the silver material.</p>
+
+    <p>Note that: the white spot is an intrinsic issue of raytracing where some area could have high variance spectrum contributed by some small area.
+    For example, the white spots on the wall can be caused by the indirect reflected light coming from a small area with high irradiance. This can be fixed
+    by using bidirectional path tracing where rays are created from both camera and light source.</p>
+
+    <h2 align="middle">Part 4: Depth of Field</h2>
+
+    <p>Pinhole camera model is a camera model that sends rays through a very small hole and calculates the image using perspective projection equation. On
+    the other hand, thin-lens camera model is a camera model that sends rays through a thin lens and calculates the image using thin-lens equation. One can
+    think of the pinhole camera model as a degenerate version of the thin-lens camera model as it is simply the case of a very small thin-len where the
+    circle of confusion is negligible.</p>
+
+    <table style="width=100%">
+        <tr>
+            <td align="middle">
+                <img src="images/0.05_0.37.png" width="480px" />
+                <figcaption align="middle">CBdragon_microfacet_au with A=0.05 and D=0.37</figcaption>
+            <td align="middle">
+                <img src="images/0.05_0.57.png" width="480px" />
+                <figcaption align="middle">CBdragon_microfacet_au with A=0.05 and D=0.57</figcaption>
+        </tr>
+        <tr>
+            <td align="middle">
+                <img src="images/0.05_0.77.png" width="480px" />
+                <figcaption align="middle">CBdragon_microfacet_au with A=0.05 and D=0.77</figcaption>
+            <td align="middle">
+                <img src="images/0.05_1.17.png" width="480px" />
+                <figcaption align="middle">CBdragon_microfacet_au with A=0.05 and D=1.17</figcaption>
+        </tr>
+    </table>
+
+    <p>As expected, the image is focused throughout the dragon's body (from head to tail) as the depth of focus increases.</p>
+
+    <table style="width=100%">
+        <tr>
+            <td align="middle">
+                <img src="images/0.05_0.57.png" width="480px" />
+                <figcaption align="middle">CBdragon_microfacet_au with A=0.05 and D=0.57</figcaption>
+            <td align="middle">
+                <img src="images/0.1.png" width="480px" />
+                <figcaption align="middle">CBdragon_microfacet_au with A=0.1 and D=0.57</figcaption>
+        </tr>
+        <tr>
+            <td align="middle">
+                <img src="images/0.2.png" width="480px" />
+                <figcaption align="middle">CBdragon_microfacet_au with A=0.2 and D=0.57</figcaption>
+            <td align="middle">
+                <img src="images/0.3.png" width="480px" />
+                <figcaption align="middle">CBdragon_microfacet_au with A=0.3 and D=0.57</figcaption>
+        </tr>
+    </table>
+
+    <p>As expected, the image's DoF is getting shallower when the aperture increases. This is the result of the larger aperture producing a bigger circle
+    of confusion.</p>
+
+    <h2 align="middle">JUST MORE PHOTOS !!!</h2>
+
+    <table style="width=100%">
+        <tr>
+            <td align="middle">
+                <img src="images/CBdragon_microfacet_au_0.1_55.png" width="480px" />
+            <td align="middle">
+                <img src="images/CBdragon_microfacet_au_0.2_55.png" width="480px" />
+        </tr>
+        <tr>
+            <td align="middle">
+                <img src="images/CBdragon_microfacet_au_0.4_55.png" width="480px" />
+            <td align="middle">
+                <img src="images/CBdragon_microfacet_au_0.7_55.png" width="480px" />
+        </tr>
+    </table>
+
+</div>
+</body>
+</html>
+
+<!--        <div align="center">-->
+<!--            <table style="width=100%">-->
+<!--                <tr>-->
+<!--                    <td align="middle">-->
+<!--                    <img src="images/example_image.png" width="480px" />-->
+<!--                    <figcaption align="middle">Results Caption: my bunny is the bounciest bunny</figcaption>-->
+<!--                </tr>-->
+<!--            </table>-->
+<!--        </div>-->
+
+
+
+
