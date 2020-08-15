@@ -1,0 +1,326 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+<style>
+  body {
+    padding: 100px;
+    width: 1000px;
+    margin: auto;
+    text-align: left;
+    font-weight: 300;
+    font-family: 'Open Sans', sans-serif;
+    color: #121212;
+  }
+  h1, h2, h3, h4 {
+    font-family: 'Source Sans Pro', sans-serif;
+  }
+</style>
+<title>CS 184 Cloth Simulation</title>
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<link href="https://fonts.googleapis.com/css?family=Open+Sans|Source+Sans+Pro" rel="stylesheet">
+</head>
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});
+</script>
+<script type="text/javascript"
+        src="http://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+
+
+<body>
+
+<h1 align="middle">CS 184: Computer Graphics and Imaging, Summer 2020</h1>
+<h1 align="middle">Project 4: Cloth Simulator</h1>
+<h2 align="middle">Billy Chau, CS184-amztc34283</h2>
+
+<br><br>
+
+<div>
+
+<h2 align="middle">Overview</h2>
+<p>Give a high-level overview of what you implemented in this project. Think about what you've built as a whole. Share your thoughts on what interesting things you've learned from completing the project.</p>
+
+<h2 align="middle">Part I: Masses and springs</h2>
+
+    <table style="width=100%">
+        <tr>
+            <td align="middle">
+                <img src="images/t1_1.png" width="480px" />
+                <figcaption align="middle">scene/pinned2.json</figcaption>
+            <td align="middle">
+                <img src="images/t1_2.png" width="480px" />
+                <figcaption align="middle">scene/pinned2.json</figcaption>
+        </tr>
+    </table>
+
+    <table style="width=100%">
+        <tr>
+            <td align="middle">
+                <img src="images/t1_3.png" width="290px" />
+                <figcaption align="middle">scene/pinned2.json without any shearing constraint</figcaption>
+            <td align="middle">
+                <img src="images/t1_4.png" width="290px" />
+                <figcaption align="middle">scene/pinned2.json with only shearing constraint</figcaption>
+            <td align="middle">
+                <img src="images/t1_5.png" width="290px" />
+                <figcaption align="middle">scene/pinned2.json with all constraints</figcaption>
+        </tr>
+    </table>
+
+    <center>
+    <p>As expected, the addition of the first two images forms the last image.</p>
+    </center>
+
+<h2 align="middle">Part II: Simulation via numerical integration</h2>
+
+    <p>By increasing the spring constant ks, the cloth appears to be less springy or more tight-fit whereas the cloth appears to be more springy or more loose-fit
+    when the spring constant decreases. In other words, the cloth with lower ks takes a longer time to stabilize and vice versa. By increasing the density, the cloth
+    appears to be heavier and takes a longer time to stabilize itself and vice versa. One of the reasons is that the heavier cloth has more gravitational force exerts on it, thus
+    requiring a longer time to burn out the energy by friction, heat, etc. By increasing the damping constant, the cloth appears to fall down slower because there are more
+    opposing forces decelerating the cloth. On the other hand, decreasing the damping constant can decrease the time required to fall down, and an extreme case will be using
+    damping = 0, where the cloth will swing around for a very long time.</p>
+
+    <table style="width=100%">
+        <tr>
+            <td align="middle">
+                <img src="images/t2_50ks.png" width="480px" />
+                <figcaption align="middle">scene/pinned2.json with ks = 50</figcaption>
+            <td align="middle">
+                <img src="images/t2_50000ks.png" width="480px" />
+                <figcaption align="middle">scene/pinned2.json with ks = 50000</figcaption>
+        </tr>
+    </table>
+
+    <p>As expected, the cloth with smaller ks has a lot of vibrations because of its springy nature while the cloth with bigger ks is stabilized.</p>
+
+    <table style="width=100%">
+        <tr>
+            <td align="middle">
+                <img src="images/t2_5den.png" width="480px" />
+                <figcaption align="middle">scene/pinned2.json with density = 5</figcaption>
+            <td align="middle">
+                <img src="images/t2_500den.png" width="480px" />
+                <figcaption align="middle">scene/pinned2.json with density = 500</figcaption>
+        </tr>
+    </table>
+
+    <p>The cloth with lower density does not have as much pulling force as the other. We can see that the pulling force is higher with higher density cloth because
+    the cloth is more flat or stretched-out in general except at the top part. In addition, we can see the vibrations in the cloth with higher density. Interestingly, we
+    can see that both density and spring constant have big impact on stability because they both have impacts on the forces acting on the point masses.</p>
+
+    <table style="width=100%">
+        <tr>
+            <td align="middle">
+                <img src="images/t2_no_damp.png" width="480px" />
+                <figcaption align="middle">scene/pinned2.json with damp = 0%</figcaption>
+            <td align="middle">
+                <img src="images/t2_toodamp.png" width="480px" />
+                <figcaption align="middle">scene/pinned2.json with damp = 1%</figcaption>
+        </tr>
+    </table>
+
+    <p>The cloth with lower damping constant swings wildly because there are not much friction burning off the energy. On the other hand, the cloth with higher damping constant
+    flows down evenly from top to bottom because a lof of energy is dissipated via friction, heat, etc; therefore, the acceleration is significantly decreased.</p>
+
+    <center>
+        <img src="images/t2_final.png" width="480px" />
+        <figcaption align="middle">Final state</figcaption>
+    </center>
+
+    <h2 align="middle">Part III: Handling collisions with other objects</h2>
+
+    <center>
+    <table style="width=100%">
+        <tr>
+            <td align="middle">
+                <img src="images/t3_1.png" width="290px" />
+                <figcaption align="middle">scene/sphere.json with ks = 5000</figcaption>
+            <td align="middle">
+                <img src="images/t3_2.png" width="290px" />
+                <figcaption align="middle">scene/sphere.json with ks = 500</figcaption>
+            <td align="middle">
+                <img src="images/t3_3.png" width="290px" />
+                <figcaption align="middle">scene/sphere.json with ks = 50000</figcaption>
+        </tr>
+    </table>
+    </center>
+
+    <p>With increased spring constant, the cloth appears to be very resistive to bending because the cloth in the last image does not bend as much as the cloth in the middle (which
+    is bended like a dumpling). The flexibility of the cloth in the first image is in between them.</p>
+
+    <table style="width=100%">
+        <tr>
+            <td align="middle">
+                <img src="images/t3_plane_wc.png" width="480px" />
+                <figcaption align="middle">scene/plane.json with cold-warm shading</figcaption>
+            <td align="middle">
+            <img src="images/t3_5.png" width="480px" />
+            <figcaption align="middle">scene/plane.json with campanile</figcaption>
+        </tr>
+    </table>
+
+<h2 align="middle">Part IV: Handling self-collisions</h2>
+
+    <center>
+        <table style="width=100%">
+            <tr>
+                <td align="middle">
+                    <img src="images/t4_1.png" width="290px" />
+                    <figcaption align="middle">scene/selfCollision.json first stage</figcaption>
+                <td align="middle">
+                    <img src="images/t4_2.png" width="290px" />
+                    <figcaption align="middle">scene/selfCollision.json second stage</figcaption>
+                <td align="middle">
+                    <img src="images/t4_3.png" width="290px" />
+                    <figcaption align="middle">scene/selfCollision.json third stage</figcaption>
+            </tr>
+        </table>
+    </center>
+
+    <p>As expected, the point masses on the cloth adjust their positions when the cloth collides.</p>
+
+    <table style="width=100%">
+        <tr>
+            <td align="middle">
+                <img src="images/t4_4_ks0.png" width="480px" />
+                <figcaption align="middle">scene/selfCollision.json with spring constant = 0</figcaption>
+            <td align="middle">
+                <img src="images/t4_5_ks100000.png" width="480px" />
+                <figcaption align="middle">scene/selfCollision.json with spring constant = 100000</figcaption>
+        </tr>
+    </table>
+
+    <p>When the spring constant is zero, the cloth appears to be like water in which does not have as much structures as a normal cloth whereas it appears to be like a thick
+    paper falling when the spring constant is high.</p>
+
+    <table style="width=100%">
+        <tr>
+            <td align="middle">
+                <img src="images/t4_6_1g.png" width="480px" />
+                <figcaption align="middle">scene/selfCollision.json with density = 1</figcaption>
+            <td align="middle">
+                <img src="images/t4_7_1000g.png" width="480px" />
+                <figcaption align="middle">scene/selfCollision.json with density = 1000</figcaption>
+        </tr>
+    </table>
+
+    <p>When the density is low, the cloth appears to be like a thick paper falling whereas it appears to be like water in which does not have as much structures as a normal
+        cloth when the spring constant is high. This trade-off is exactly the same discussed in part 2 in which the force is the result of both spring constant and density.</p>
+
+<h2 align="middle">Part V: Shaders</h2>
+
+    <p>Shader program is a program that could run massively parallel directly on the GPU. The built-in functions of the shader programs are usually limited by the micro-architecture
+    of the GPU. Normally, it is used for two purposes: processing vertex and fragment. Vertex shader takes in the information of the vertex such as position, normal vector, tangent
+    vector, and the uv coordinate as inputs and outputs the same information in model space and screen space; therefore, the info passed in is based on the object space. Fragment
+    shader on the other hand takes in the output of the vertex shader and outputs a final color for that vertex/fragment; therefore, most of the work is done at the fragment shader.
+    </p>
+    <p>Blinn-Phong shading combines three different perspectives of lighting together. It combines ambient effect, diffuse effect, and specular effect together. First, ambient effect does
+    not depend on anything, so we can think of it as the base color when there is light or not. Second, diffuse effect depends on the light and normal directions, and it decays according to
+    1/r^2. Third, specular effect depends on the light, normal, and viewing directions.</p>
+    <table style="width=100%">
+        <tr>
+            <td align="middle">
+                <img src="images/t5_1.png" width="480px" />
+                <figcaption align="middle">scene/sphere.json with ambient</figcaption>
+            <td align="middle">
+                <img src="images/t5_2.png" width="480px" />
+                <figcaption align="middle">scene/sphere.json with diffuse</figcaption>
+        </tr>
+        <tr>
+            <td align="middle">
+                <img src="images/t5_3.png" width="480px" />
+                <figcaption align="middle">scene/sphere.json with specular</figcaption>
+            <td align="middle">
+                <img src="images/t5_4.png" width="480px" />
+                <figcaption align="middle">scene/sphere.json with all</figcaption>
+        </tr>
+    </table>
+
+    <center>
+        <img src="images/t5_texture.png" width="480px" />
+        <figcaption align="middle">Custom texture with poseidon rising with the bad perspective transform</figcaption>
+    </center>
+
+    <p>Bump Mapping artificially creates texture that appears to be more 3d by looking at the height map of the texture. The height is then used
+    to calculate the normal vector in object space. The normal vector is then transformed to the model space by multiplying the tangent-bitangent-normal matrix which defines
+    the coordinates of the object space in the model space. On the other hand, displacement mapping additionally modifies the position of the vertices according to the normal vector change
+    calculated from bump mapping.</p>
+
+    <table style="width=100%">
+        <tr>
+            <td align="middle">
+                <img src="images/t5_bump.png" width="480px" />
+                <figcaption align="middle">scene/sphere.json with bump</figcaption>
+            <td align="middle">
+                <img src="images/t5_displace.png" width="480px" />
+                <figcaption align="middle">scene/sphere.json with displacement</figcaption>
+        </tr>
+    </table>
+
+    <p>By increasing the coarseness of the sphere, there are more spiky shapes. Although it is not obvious with low bump height as depicted below, it becomes significant when the
+    bump height is high.</p>
+
+    <table style="width=100%">
+        <tr>
+            <td align="middle">
+                <img src="images/t5_16_100_0.05.png" width="480px" />
+                <figcaption align="middle">scene/sphere.json with displacement and low bump height and low coarseness</figcaption>
+            <td align="middle">
+                <img src="images/t5_128_100_0.05.png" width="480px" />
+                <figcaption align="middle">scene/sphere.json with displacement and low bump height and high coarseness</figcaption>
+        </tr>
+        <tr>
+            <td align="middle">
+                <img src="images/t5_16_100_0.2.png" width="480px" />
+                <figcaption align="middle">scene/sphere.json with displacement and high bump height and low coarseness</figcaption>
+            <td align="middle">
+                <img src="images/t5_128_100_0.2.png" width="480px" />
+                <figcaption align="middle">scene/sphere.json with displacement and high bump height and high coarseness</figcaption>
+        </tr>
+    </table>
+
+    <p>By increasing the coarseness of the sphere, the specular reflection becomes more spherical in comparison to a non-spherical shaped specular reflection in sphere
+    with lower coarseness.</p>
+
+    <table style="width=100%">
+        <tr>
+            <td align="middle">
+                <img src="images/t5_16_10_0.05.png" width="480px" />
+                <figcaption align="middle">scene/sphere.json with bump and low coarseness</figcaption>
+            <td align="middle">
+                <img src="images/t5_128_10_0.05.png" width="480px" />
+                <figcaption align="middle">scene/sphere.json with bump and high coarseness</figcaption>
+        </tr>
+    </table>
+
+    <center>
+        <img src="images/t5_7.png" width="480px" />
+        <figcaption align="middle">scene/sphere.json with reflection</figcaption>
+    </center>
+
+    <p>In the extra credit portion, I implemented the cold-to-warm shading by using the following equation:</p>
+
+    $$ c = k_wc_w + (1 - k_w)c_c$$
+    $$ k_w = \frac{1 + n \cdot l}{2}$$
+    Value chosen:
+    $$ c_c = (0.4, 0.4, 0.7)$$
+    $$ c_w = (0.8, 0.6, 0.6)$$
+
+    <center>
+        <img src="images/t6_1.png" width="480px" />
+        <figcaption align="middle">scene/sphere.json with cold-to-warm shading front facing to light</figcaption>
+    </center>
+    <center>
+        <img src="images/t6_2.png" width="480px" />
+        <figcaption align="middle">scene/sphere.json with cold-to-warm shading rear facing to light</figcaption>
+    </center>
+    <center>
+        <img src="images/t6_3.png" width="480px" />
+        <figcaption align="middle">scene/sphere.json with cold-to-warm shading top-down view</figcaption>
+    </center>
+
+    <p>As expected, the idea of cold-to-warm shading is to give more warm color to position where its normal is facing more to the light while giving cold color to
+    position where its normal is not facing to the light as much.</p>
+
+</body>
+</html>
